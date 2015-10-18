@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,13 +15,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_MESSAGE = "com.example.sledd.helloworld";
+    private static final String TAG = "MainActivity";
     private static final int PICK_IMAGE_REQUEST_CODE = 1;
 
-
+    private static LinkedList<Uri> imageList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,10 +60,25 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null )
         {
             Uri uri = data.getData();
+
+            if (imageList == null)
+                imageList = new LinkedList<>();
+
+            imageList.add(uri);
+            Log.i(TAG, "This is the Image name: " + uri.getLastPathSegment());
+            Log.i(TAG, "This the length of the list: " + imageList.size());
+
+
+
+
             try{
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+
+                //Log.i(TAG, "The image name is: " + bitmap.toString() );
                 ImageView imageview = (ImageView) findViewById(R.id.imageView);
                 imageview.setImageBitmap(bitmap);
+
+
 
 
             }catch(IOException e)
@@ -88,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent();
         i.setType("image/*");
         i.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(i/*Intent.createChooser(i, "Yo Bro Select the Picture!")*/, PICK_IMAGE_REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(i, "Yo Bro Select the Picture!"), PICK_IMAGE_REQUEST_CODE);
 
 
 
