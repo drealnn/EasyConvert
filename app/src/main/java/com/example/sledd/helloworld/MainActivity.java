@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,7 +15,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST_CODE = 1;
 
     private static LinkedList<Uri> imageList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
 
             try{
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-
                 //Log.i(TAG, "The image name is: " + bitmap.toString() );
                 ImageView imageview = (ImageView) findViewById(R.id.imageView);
                 imageview.setImageBitmap(bitmap);
@@ -106,9 +121,51 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent();
         i.setType("image/*");
         i.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(i, "Yo Bro Select the Picture!"), PICK_IMAGE_REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(i, "Select a Picture!"), PICK_IMAGE_REQUEST_CODE);
+
+    }
+
+    public void createPdf(View view) throws  DocumentException, java.io.IOException
+    {
+        File pdfFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "EasyConvert"); // check this warning, may be important for diff API levels
+
+        if (!pdfFolder.exists()) {
+            pdfFolder.mkdirs();
+            Log.i(TAG, "Folder successfully created");
+        }
+
+        if (imageList != null)
+        {
+            Date date = new Date();
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(date);
+
+            File myPDF = new File(pdfFolder + "/" + timeStamp + ".pdf");
+
+            OutputStream output = new FileOutputStream(myPDF);
+
+            Document document = new Document();
+            PdfWriter.getInstance(document, output);
+
+            document.open();
+            //document.add(new Paragraph("~~~~Hello World!!~~~~"));
+            for (int i = 0; i < imageList.size(); i++)
+            {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageList.get(i));
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] byteArray = stream.toByteArray();
+
+                com.itextpdf.text.Image img = com.itextpdf.text.Image.getInstance(byteArray);
+                Log.i(TAG, "We got to here!");
+                document.add(img);
 
 
 
+            }
+            imageList = null;
+            document.close();
+
+
+        }
     }
 }
