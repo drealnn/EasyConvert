@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void createPdf(View view) throws  DocumentException, java.io.IOException
     {
-        File pdfFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "EasyConvert"); // check this warning, may be important for diff API levels
+        File pdfFolder = new File(Environment.getExternalStorageDirectory(), "EasyConvert"); // check this warning, may be important for diff API levels
 
         if (!pdfFolder.exists()) {
             pdfFolder.mkdirs();
@@ -152,6 +152,8 @@ public class MainActivity extends AppCompatActivity {
             {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageList.get(i));
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
 
