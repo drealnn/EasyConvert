@@ -154,19 +154,33 @@ public class MainActivity extends AppCompatActivity {
             Document document = new Document();
             PdfWriter.getInstance(document, output);
 
+            long startTime, estimatedTime;
+
             document.open();
             //document.add(new Paragraph("~~~~Hello World!!~~~~"));
             for (int i = 0; i < imageList.size(); i++)
             {
+
+                // create bitmap from URI in our list
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageList.get(i));
+
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
+                startTime = System.currentTimeMillis();
 
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                // changed from png to jpeg, lowered processing time greatly
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+                estimatedTime = System.currentTimeMillis() - startTime;
+
+                Log.e(TAG, "compressed image into stream: " + estimatedTime);
+
                 byte[] byteArray = stream.toByteArray();
 
+                // instantiate itext image
                 com.itextpdf.text.Image img = com.itextpdf.text.Image.getInstance(byteArray);
-                Log.i(TAG, "We got to here!");
+
+                img.scaleAbsolute(128f, 128f);
                 document.add(img);
 
 
