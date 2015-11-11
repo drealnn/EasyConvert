@@ -1,5 +1,7 @@
 package com.example.sledd.helloworld;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.Image;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.sledd.helloworld";
     private static final String TAG = "MainActivity";
     private static final int PICK_IMAGE_REQUEST_CODE = 1;
+    private File myPDF;
 
     private static LinkedList<Uri> imageList;
 
@@ -125,7 +128,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void createPdf(View view) throws  DocumentException, java.io.IOException
+    public void onConvertPdfClick(View view) throws DocumentException, java.io.IOException
+    {
+        createPdf();
+    }
+
+    public void createPdf() throws  DocumentException, java.io.IOException
     {
         File pdfFolder = new File(Environment.getExternalStorageDirectory(), "EasyConvert"); // check this warning, may be important for diff API levels
 
@@ -139,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
             Date date = new Date();
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(date);
 
-            File myPDF = new File(pdfFolder + "/" + timeStamp + ".pdf");
+            myPDF = new File(pdfFolder + "/" + timeStamp + ".pdf");
 
             OutputStream output = new FileOutputStream(myPDF);
 
@@ -166,8 +174,53 @@ public class MainActivity extends AppCompatActivity {
             }
             imageList = null;
             document.close();
-
+            promptForNextAction();
 
         }
     }
+
+    private void viewPdf(){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(myPDF), "application/pdf");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+    }
+
+    private void emailNote()
+    {
+        Intent email = new Intent(Intent.ACTION_SEND);
+        //email.putExtra(Intent.EXTRA_SUBJECT,mSubjectEditText.getText().toString());
+        //email.putExtra(Intent.EXTRA_TEXT, mBodyEditText.getText().toString());
+        Uri uri = Uri.parse(myPDF.getAbsolutePath());
+        email.putExtra(Intent.EXTRA_STREAM, uri);
+        email.setType("message/rfc822");
+        startActivity(email);
+    }
+
+    public void promptForNextAction()
+    {
+        final String[] options = { "email", "preview",
+                "cancel" };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Note Saved, What Next?");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (options[which].equals("email")){
+                    emailNote();
+                }else if (options[which].equals("preview")){
+                    viewPdf();
+                }else if (options[which].equals("cancel")){
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        builder.show();
+
+    }
+
+
+
 }

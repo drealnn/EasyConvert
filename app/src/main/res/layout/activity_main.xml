@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:text="Convert"
         android:id="@+id/button2"
-        android:onClick="createPdf"
+        android:onClick="onConvertPdfClick"
         android:layout_alignTop="@+id/button"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
