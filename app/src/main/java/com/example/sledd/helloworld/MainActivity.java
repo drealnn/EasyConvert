@@ -19,6 +19,8 @@ import android.widget.ImageView;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 
@@ -180,8 +182,16 @@ public class MainActivity extends AppCompatActivity {
                 // instantiate itext image
                 com.itextpdf.text.Image img = com.itextpdf.text.Image.getInstance(byteArray);
 
-                img.scaleAbsolute(128f, 128f);
+                //img.scalePercent(40, 40);
+                //img.setAlignment(Element.ALIGN_CENTER);
+
+                img.scaleAbsolute(PageSize.LETTER.getWidth(), PageSize.LETTER.getHeight());
+                img.setAbsolutePosition(
+                        (PageSize.LETTER.getWidth() - img.getScaledWidth()) / 2,
+                        (PageSize.LETTER.getHeight() - img.getScaledHeight()) / 2
+                );
                 document.add(img);
+                document.newPage();
 
 
 
@@ -217,7 +227,8 @@ public class MainActivity extends AppCompatActivity {
                 "cancel" };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Note Saved, What Next?");
+        builder.setTitle("PDF Saved, What Next?");
+
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
